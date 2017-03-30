@@ -1,13 +1,11 @@
 package kmeans;
 
 import java.awt.Rectangle;
-import java.awt.Shape;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javafx.scene.shape.Circle;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartFrame;
@@ -21,16 +19,16 @@ import org.jfree.data.xy.XYSeriesCollection;
 import org.apache.commons.cli.*;
 
 public class KmeansApplication {
-    private int clusterCountGeneration; // = 5; // for DataPoint generation
-    private int dataPointsCountPerCluster; // = 500;
+    private int clusterCountGeneration;
+    private int dataPointsCountPerCluster;
     
-    private int dimensions; // = 2;
-    private int seed; // = 100; //108; // seed: -1 is random
+    private int dimensions;
+    private int seed;
     
-    private int clusterCountKmeans; // = 3;
+    private int clusterCountKmeans;
     
-    private KmeansClustering.Algorithm algorithm; // = KmeansClustering.Algorithm.LLOYD;
-    private KmeansClustering.InitializationStrategy initializationStrategy; // = KmeansClustering.InitializationStrategy.RANDOM_PARTITION;
+    private KmeansClustering.Algorithm algorithm;
+    private KmeansClustering.InitializationStrategy initializationStrategy;
     
     private String outputFilename;
     
@@ -165,12 +163,11 @@ public class KmeansApplication {
             result.addSeries(series);
         }
         
-        // create a chart...
         JFreeChart chart = ChartFactory.createScatterPlot(
-            title, // chart title
-            "X", // x axis label
-            "Y", // y axis label
-            result, // data  ***-----PROBLEM------***
+            title,
+            "X",
+            "Y",
+            result,
             PlotOrientation.VERTICAL,
             true, // include legend
             true, // tooltips

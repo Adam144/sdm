@@ -1,7 +1,6 @@
 package kmeans;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class DataCluster implements ICluster {
@@ -19,14 +18,17 @@ public class DataCluster implements ICluster {
         this.dataPoints.add(dp);
     }
     
+    @Override
     public DataPoint getClusterCenter() {
         return this.clusterCenter;
     }
     
+    @Override
     public DataPoint[] getDataPoints() {
        return this.dataPoints.toArray(new DataPoint[this.dataPoints.size()]);
     }
     
+    @Override
     public int getClusterId() {
         return this.clusterId;
     }

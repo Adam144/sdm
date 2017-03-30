@@ -1,6 +1,5 @@
 package kmeans;
 
-import java.io.Console;
 import java.util.Random;
 import java.util.function.Supplier;
 
@@ -57,18 +56,5 @@ public class Generator {
     
     public DataCluster[] getClusters() {
         return this.clusters;
-    }
-
-    @Override
-    public String toString() {
-        return "NOT YET IMPLEMENTED - Generator.toString()";
-        /*StringBuilder sb = new StringBuilder();
-        
-        for (int cluster = 0; cluster < this.clusterCount; cluster++) {
-            sb.append(this.centers[cluster].toString());
-            sb.append("\n");
-        }
-
-        return sb.toString();*/
     }
 }

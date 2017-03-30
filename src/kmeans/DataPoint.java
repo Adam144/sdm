@@ -31,13 +31,9 @@ public class DataPoint {
         this.coordinates = new Double[this.dimensions];
         
         for(int i = 0; i < this.dimensions; i++)
-            set(i, coordinates[i]);
+            this.set(i, coordinates[i]);
     }
-    
-    private final void init() {
         
-    }
-    
     public void set(int dimension, double value) throws KmeansException {
         if(dimension > this.dimensions || dimension < 0)
             throw new KmeansException("invalid dimension passed");

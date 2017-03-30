@@ -1,9 +1,7 @@
 package kmeans;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class KmeansCluster implements ICluster {
 
@@ -68,8 +66,5 @@ public class KmeansCluster implements ICluster {
     @Override
     public String toString() {
         return "KmeansCluster id=" + this.clusterId;
-        
     }
-    
-    
 }
