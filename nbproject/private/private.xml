@@ -3,10 +3,14 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
+            <file>file:/home/binderchri/Dropbox/UNI/Scientific%20Data%20Management/assignments/Kmeans/src/kmeans/KmeansCluster.java</file>
             <file>file:/home/binderchri/Dropbox/UNI/Scientific%20Data%20Management/assignments/Kmeans/src/kmeans/Generator.java</file>
             <file>file:/home/binderchri/Dropbox/UNI/Scientific%20Data%20Management/assignments/Kmeans/src/kmeans/DataPoint.java</file>
-            <file>file:/home/binderchri/Dropbox/UNI/Scientific%20Data%20Management/assignments/Kmeans/src/kmeans/Cluster.java</file>
-            <file>file:/home/binderchri/Dropbox/UNI/Scientific%20Data%20Management/assignments/Kmeans/src/kmeans/Kmeans.java</file>
+            <file>file:/home/binderchri/Dropbox/UNI/Scientific%20Data%20Management/assignments/Kmeans/src/kmeans/ICluster.java</file>
+            <file>file:/home/binderchri/Dropbox/UNI/Scientific%20Data%20Management/assignments/Kmeans/src/kmeans/DataCluster.java</file>
+            <file>file:/home/binderchri/Dropbox/UNI/Scientific%20Data%20Management/assignments/Kmeans/src/kmeans/KmeansDataPoint.java</file>
+            <file>file:/home/binderchri/Dropbox/UNI/Scientific%20Data%20Management/assignments/Kmeans/src/kmeans/KmeansApplication.java</file>
+            <file>file:/home/binderchri/Dropbox/UNI/Scientific%20Data%20Management/assignments/Kmeans/src/kmeans/KmeansClustering.java</file>
             <file>file:/home/binderchri/Dropbox/UNI/Scientific%20Data%20Management/assignments/Kmeans/src/kmeans/KmeansException.java</file>
         </group>
     </open-files>
