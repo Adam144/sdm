@@ -14,22 +14,23 @@ public class Hasher {
     
     private DataPoint[] dataPoints;
     private DataPoint[] hashes;
+    private double[][] hashFunctions;
     private int numberOfHashes;
     private int dimensionOfPoints;
     
     public Hasher(DataPoint[] dataPoints, int numberOfHashes) throws KmeansException {
         this.dataPoints = dataPoints;
         this.hashes = new DataPoint[this.dataPoints.length];
-        
-        if (numberOfHashes < 1) {
-            throw new KmeansException("Number of hashes must be greater then 0.");
-        }
-        this.numberOfHashes = numberOfHashes;
-        this.dimensionOfPoints = dataPoints.length > 0 ? dataPoints[0].getDimensions() : 0;
-        
         for (int i = 0; i < this.dataPoints.length; i++){
             this.hashes[i] = new DataPoint(numberOfHashes);
         }
+        if (numberOfHashes < 1) {
+            throw new KmeansException("Number of hashes must be greater then 0.");
+        }
+        this.numberOfHashes = numberOfHashes;// how many hash functions I will use
+        this.dimensionOfPoints = dataPoints.length > 0 ? dataPoints[0].getDimensions() : 0;
+        this.hashFunctions = new double[this.numberOfHashes][this.dimensionOfPoints];
+        generateHashFunction();
     }
     
     private double getHashOfPoint(DataPoint point, double[] hashFunction) throws KmeansException {
@@ -40,24 +41,32 @@ public class Hasher {
         return hashValue;
     }
     
-    private double[] generateHashFunction(int dimension){
-        double[] fnc = new double[dimension];
-        Random random = new Random();
-        for (int i = 0; i < dimension; i++){
-            fnc[i] = random.nextGaussian();
+    public DataPoint getAllHashesOfPoint(DataPoint point) throws KmeansException { //vector of hashes
+        DataPoint hash = new DataPoint(this.numberOfHashes);
+        for (int j = 0; j < this.numberOfHashes; j++){
+            hash.set(j, getHashOfPoint(point, hashFunctions[j]));
         }
-        return fnc;
+        return hash;
+    }
+    
+    private void generateHashFunction(){//hash function is vector of coeficients from N(0,1)
+        Random random = new Random();
+        for (int j = 0; j < this.numberOfHashes; j++){
+            for (int i = 0; i < this.dimensionOfPoints; i++){
+                this.hashFunctions[j][i] = random.nextGaussian();
+            }
+        }
     }
     
     public DataPoint[] getHashes() throws KmeansException {
-        double[] hashFunction; //hash function is vector of coeficient from N(0,1)
-        for (int i = 0; i < this.numberOfHashes; i++){
-            hashFunction = generateHashFunction(this.dimensionOfPoints);
-            for (int j = 0; j < this.dataPoints.length; j++){
-                double hash = getHashOfPoint(this.dataPoints[j], hashFunction);
-                this.hashes[j].set(i, hash);
-            }
+        for (int j = 0; j < this.dataPoints.length; j++){
+            DataPoint hash = getAllHashesOfPoint(this.dataPoints[j]);
+            this.hashes[j] = hash;
         }
         return this.hashes;
+    }
+    
+    public double[] getHashFunction(int n){
+        return this.hashFunctions[n];
     }
 }
