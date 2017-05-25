@@ -116,6 +116,9 @@ public class KmeansApplication {
 
         DataPoint[] dataPoints = Arrays.stream(gen.getClusters()).flatMap(c -> Arrays.stream(c.getDataPoints())).toArray(DataPoint[]::new);
 
+        Hasher hasher = new Hasher(dataPoints, 7);//TODO 100=numberOfhashes as param
+        DataPoint[] hashDataPoints = hasher.getHashes();
+        
         KmeansClustering clustering = new KmeansClustering(
                 dataPoints, 
                 this.dimensions, 
