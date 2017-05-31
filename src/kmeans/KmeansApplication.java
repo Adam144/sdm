@@ -1,11 +1,19 @@
 package kmeans;
 
 import java.awt.Rectangle;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartFrame;
@@ -32,11 +40,14 @@ public class KmeansApplication {
     
     private String outputFilename;
     
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         try {
+            long completTimeStart = System.nanoTime();
             KmeansApplication app = new KmeansApplication();
             app.init(args);
             app.run();
+            long completTime = System.nanoTime() - completTimeStart;
+            System.out.println("=== Complet time: " + completTime + " ===");
         } catch (KmeansException ex) {
             Logger.getLogger(KmeansApplication.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -93,8 +104,8 @@ public class KmeansApplication {
         }
 
         this.clusterCountGeneration = Integer.parseInt(cmd.getOptionValue("clusters-generation", "3"));
-        this.clusterCountKmeans = Integer.parseInt(cmd.getOptionValue("clusters-clustering", "3"));
-        this.dimensions = Integer.parseInt(cmd.getOptionValue("dimensions", "2"));
+        this.clusterCountKmeans = Integer.parseInt(cmd.getOptionValue("clusters-clustering", "15"));
+        this.dimensions = Integer.parseInt(cmd.getOptionValue("dimensions", "10"));
         this.dataPointsCountPerCluster = Integer.parseInt(cmd.getOptionValue("datapoints-count", "100"));
         this.seed = Integer.parseInt(cmd.getOptionValue("seed", "-1"));
         
@@ -104,7 +115,7 @@ public class KmeansApplication {
         this.outputFilename = cmd.getOptionValue("output-filename");
     }
     
-    public void run() throws KmeansException {
+    public void run() throws KmeansException, IOException {
         Generator gen = new Generator(
             this.clusterCountGeneration,
             this.dataPointsCountPerCluster,
@@ -114,7 +125,41 @@ public class KmeansApplication {
             
         gen.generate();
 
-        DataPoint[] dataPoints = Arrays.stream(gen.getClusters()).flatMap(c -> Arrays.stream(c.getDataPoints())).toArray(DataPoint[]::new);
+        //DataPoint[] dataPoints = Arrays.stream(gen.getClusters()).flatMap(c -> Arrays.stream(c.getDataPoints())).toArray(DataPoint[]::new);
+        String filePath = new File("").getAbsolutePath();
+        BufferedReader reader = new BufferedReader(new FileReader(filePath + "\\data\\LSH-nmi.csv"));
+        String line = null;
+        Scanner scanner = null;
+        int points = 0;
+        List<DataPoint> dataPointList = new ArrayList<>();
+        
+        List<Integer> reality = new ArrayList<>();
+        String pattern = "(\\w*)(\\d+).*";
+        Pattern patt = Pattern.compile(pattern);
+        Matcher m;
+
+        while ((line = reader.readLine()) != null) {
+                DataPoint p = new DataPoint(this.dimensions);
+                scanner = new Scanner(line);
+                scanner.useDelimiter(",");
+                for (int i = 0; i < this.dimensions+1; i++) {
+                        if (i < this.dimensions){
+                            double value = Double.parseDouble(scanner.next());
+                            p.set(i, value);
+                        } else { //last column with info about right cluster
+                            m = patt.matcher(scanner.next());
+                            if (m.find()){
+                                reality.add(Integer.valueOf(m.group(2)));
+                            } else {
+                                throw new RuntimeException("Pattern dont match. Cluster id "+i+" parsed!");
+                            }
+                        }
+                }
+                dataPointList.add(p);
+                points++;
+        }
+        reader.close();
+        DataPoint[] dataPoints = dataPointList.toArray(new DataPoint[points]);
         
         KmeansClustering clustering = new KmeansClustering(
                 dataPoints,
@@ -125,13 +170,17 @@ public class KmeansApplication {
                 this.algorithm          
         );
         clustering.run();
+        
+        double err = clustering.getClusteringError(reality);
+        System.out.println("Algorithm error: "+err*100+"%.");
+        
+        if (this.dimensions == 2){
+            plot2d(gen.getClusters(), true, "Generated");
+            plot2d(gen.getClusters(), false, "Generated");
 
-        plot2d(gen.getClusters(), true, "Generated");
-        plot2d(gen.getClusters(), false, "Generated");
-
-
-        plot2d(clustering.clusters, true, "Clustering");
-        plot2d(clustering.clusters, false, "Clustering");
+            plot2d(clustering.clusters, true, "Clustering");
+            plot2d(clustering.clusters, false, "Clustering");
+        }
         
         if(this.outputFilename != null) {
             output(clustering.clusters);

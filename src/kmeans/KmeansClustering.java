@@ -1,15 +1,20 @@
 package kmeans;
 
+import static java.lang.Math.abs;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 
 public class KmeansClustering {
 
     protected final KmeansDataPoint[] dataPoints;
+    protected final KmeansDataPoint[] hashDataPoints;
+    private Hasher hasher;
     private final int dimensions;
     protected final int k;
     
-    private final int maxRounds = 1000;
+    private final int maxRounds = 200;
     private int roundCount = 0;
     protected Random random;
     protected KmeansCluster[] clusters;
@@ -30,8 +35,10 @@ public class KmeansClustering {
         MACQUEEN
     }
         
-    public KmeansClustering(DataPoint[] dataPoints, int dimensions, int k, int seed, InitializationStrategy strategy, Algorithm algorithm) {
+    public KmeansClustering(DataPoint[] dataPoints, int dimensions, int k, int seed, InitializationStrategy strategy, Algorithm algorithm) throws KmeansException{
         this.dataPoints = Arrays.stream(dataPoints).map(dp -> new KmeansDataPoint(dp)).toArray(size -> new KmeansDataPoint[size]);
+        this.hasher = new Hasher(dataPoints, 6);//TODO 4=numberOfhashes as param 
+        this.hashDataPoints = Arrays.stream(hasher.getHashes()).map(dp -> new KmeansDataPoint(dp)).toArray(size -> new KmeansDataPoint[size]);
         this.dimensions = dimensions;
         this.k = k;
         
@@ -53,6 +60,7 @@ public class KmeansClustering {
             
             runRound();
             this.roundCount ++;
+            System.out.println("round: "+this.roundCount);
         } while (!isConverged());
         
         System.out.println("=== Converged after " + this.roundCount + " rounds ===");
@@ -87,9 +95,12 @@ public class KmeansClustering {
     
     public void runRound() throws KmeansException {
         this.clustersChangedDuringRound = false;
-        
-        for(KmeansDataPoint point : this.dataPoints) {
-            KmeansCluster closestCluster = findClosestCluster(point);
+        KmeansDataPoint point;
+        KmeansDataPoint hashPoint;
+        for(int i = 0; i < this.dataPoints.length; i++) {
+            point = this.dataPoints[i];
+            hashPoint = this.hashDataPoints[i];
+            KmeansCluster closestCluster = findClosestCluster(point, hashPoint);
             KmeansCluster lastAssignedCluster = point.getCluster();
             
             if(lastAssignedCluster != closestCluster)
@@ -113,23 +124,53 @@ public class KmeansClustering {
         }
     }
     
-    public KmeansCluster findClosestCluster(KmeansDataPoint dataPoint) throws KmeansException {
+    public KmeansCluster findClosestCluster(KmeansDataPoint dataPoint, KmeansDataPoint hashPoint) throws KmeansException {
         double currentDistance = 0;
         KmeansCluster closestCluster = null;
-        
+        double distance;
         for(KmeansCluster cluster : this.clusters) {
-          double distance = dataPoint.getDataPoint().getDistance(cluster.getClusterCenter());
+          //double distance = dataPoint.getDataPoint().getDistance(cluster.getClusterCenter());
+          distance = isInSameBucket(hashPoint, this.hasher.getAllHashesOfPoint(cluster.getClusterCenter())) ? 0 : dataPoint.getDataPoint().getDistance(cluster.getClusterCenter());
           if(distance < currentDistance || closestCluster == null) {
               closestCluster = cluster;
               currentDistance = distance;
+              if (distance == 0) {break;}
           }
         }
         
         return closestCluster;
     }
-        
+    
+    private boolean isInSameBucket(KmeansDataPoint hashPoint, DataPoint hashCenter) throws KmeansException{
+        int numberOfBlocks = 2;
+        int rowsPerBlock = hashCenter.getDimensions()/numberOfBlocks;
+        boolean same = true;
+        for (int b = 0; b < numberOfBlocks; b++) {
+            for (int r = 0; r < rowsPerBlock; r++) {
+                if (abs(hashPoint.getDataPoint().get(b*rowsPerBlock + r) - hashCenter.get(b*rowsPerBlock + r)) > 5){
+                    same = false;
+                    break;
+                }
+            }
+            if (same == true){
+                return true;
+            }
+            same = true;
+        }
+        return false;
+    }
+    
     public boolean isConverged() {
         return !clustersChangedDuringRound;
+    }
+    
+    public double getClusteringError(List<Integer> reality) {
+        
+        ArrayList<Integer> results = new ArrayList<Integer>();
+        for (int i = 0; i < this.dataPoints.length; i++){
+            results.add(this.dataPoints[i].getCluster().getClusterId());
+        }
+        return CalculateNMI.NMI(new ArrayList<Integer>(reality), results);
     }
     
 }
