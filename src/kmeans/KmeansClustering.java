@@ -8,6 +8,7 @@ import java.util.Random;
 
 public class KmeansClustering {
 
+    public int same_number = 0;
     protected final KmeansDataPoint[] dataPoints;
     protected final KmeansDataPoint[] hashDataPoints;
     private Hasher hasher;
@@ -37,7 +38,7 @@ public class KmeansClustering {
         
     public KmeansClustering(DataPoint[] dataPoints, int dimensions, int k, int seed, InitializationStrategy strategy, Algorithm algorithm) throws KmeansException{
         this.dataPoints = Arrays.stream(dataPoints).map(dp -> new KmeansDataPoint(dp)).toArray(size -> new KmeansDataPoint[size]);
-        this.hasher = new Hasher(dataPoints, 6);//TODO 4=numberOfhashes as param 
+        this.hasher = new Hasher(dataPoints, 4);//TODO 4=numberOfhashes as param 
         this.hashDataPoints = Arrays.stream(hasher.getHashes()).map(dp -> new KmeansDataPoint(dp)).toArray(size -> new KmeansDataPoint[size]);
         this.dimensions = dimensions;
         this.k = k;
@@ -147,12 +148,13 @@ public class KmeansClustering {
         boolean same = true;
         for (int b = 0; b < numberOfBlocks; b++) {
             for (int r = 0; r < rowsPerBlock; r++) {
-                if (abs(hashPoint.getDataPoint().get(b*rowsPerBlock + r) - hashCenter.get(b*rowsPerBlock + r)) > 5){
+                if (((int) hashPoint.getDataPoint().get(b*rowsPerBlock + r)/10) != ((int)hashCenter.get(b*rowsPerBlock + r)/10)){//buckets are [0,10][10,20]...
                     same = false;
                     break;
                 }
             }
             if (same == true){
+                same_number++;
                 return true;
             }
             same = true;
@@ -166,6 +168,7 @@ public class KmeansClustering {
     
     public double getClusteringError(List<Integer> reality) {
         
+        System.out.println(this.same_number + " same buckets were founded.");
         ArrayList<Integer> results = new ArrayList<Integer>();
         for (int i = 0; i < this.dataPoints.length; i++){
             results.add(this.dataPoints[i].getCluster().getClusterId());
